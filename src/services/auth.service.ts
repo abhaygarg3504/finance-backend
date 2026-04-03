@@ -4,6 +4,13 @@ import { prisma } from '../prisma/client';
 import { ApiError } from '../utils/ApiError';
 import { Role } from '@prisma/client';
 
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is not defined');
+}
+
 interface RegisterInput {
   name: string;
   email: string;
@@ -16,9 +23,17 @@ interface LoginInput {
   password: string;
 }
 
-const generateToken = (payload: { id: string; role: Role; email: string }): string => {
-  return jwt.sign(payload, process.env.JWT_SECRET as string, {
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+// const generateToken = (payload: { id: string; role: Role; email: string }): string => {
+//   return jwt.sign(payload, process.env.JWT_SECRET as string, {
+//     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+//   });
+// };
+
+const generateToken = (
+  payload: { id: string; role: Role; email: string }
+): string => {
+  return jwt.sign(payload, JWT_SECRET, {
+    expiresIn: JWT_EXPIRES_IN,
   });
 };
 

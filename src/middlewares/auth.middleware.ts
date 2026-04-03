@@ -3,7 +3,11 @@ import jwt from 'jsonwebtoken';
 import { AuthRequest } from '../types';
 import { ApiError } from '../utils/ApiError';
 import { prisma } from '../prisma/client';
+const JWT_SECRET = process.env.JWT_SECRET;
 
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is not defined');
+}
 interface JwtPayload {
   id: string;
   role: string;
@@ -24,10 +28,7 @@ export const authenticate = async (
 
     const token = authHeader.split(' ')[1];
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET as string
-    ) as JwtPayload;
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
